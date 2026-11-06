@@ -2,7 +2,7 @@
 
 namespace Database\Factories;
 
-use App\Domain\Pricing\PricingRegion;
+use App\Domain\PricingRegion;
 use App\Models\Country;
 use Illuminate\Database\Eloquent\Factories\Factory;
 

@@ -1,11 +1,11 @@
 <?php
 
-use App\Domain\Pricing\InvalidTripDuration;
-use App\Domain\Pricing\PricingRegion;
-use App\Domain\Pricing\TravelInsurancePricer;
+use App\Domain\Exception\InvalidTripPeriod;
+use App\Domain\PremiumCalculator;
+use App\Domain\PricingRegion;
 
 it('charges three dollars per day before any regional surcharge', function () {
-    $price = (new TravelInsurancePricer)->price(10, PricingRegion::SouthAmerica);
+    $price = (new PremiumCalculator)->price(10, PricingRegion::SouthAmerica);
 
     expect($price->days)->toBe(10)
         ->and($price->dailyRate->toDecimal())->toBe('3.00')
@@ -16,7 +16,7 @@ it('charges three dollars per day before any regional surcharge', function () {
 });
 
 it('reproduces the ten day trip to Spain', function () {
-    $price = (new TravelInsurancePricer)->price(10, PricingRegion::Europe);
+    $price = (new PremiumCalculator)->price(10, PricingRegion::Europe);
 
     expect($price->base->toDecimal())->toBe('30.00')
         ->and($price->surchargePercent)->toBe(20)
@@ -25,7 +25,7 @@ it('reproduces the ten day trip to Spain', function () {
 });
 
 it('applies the published regional surcharge table', function (PricingRegion $region, int $percent, int $totalCents) {
-    $price = (new TravelInsurancePricer)->price(10, $region);
+    $price = (new PremiumCalculator)->price(10, $region);
 
     expect($region->surchargePercent())->toBe($percent)
         ->and($price->total->cents)->toBe($totalCents);
@@ -40,7 +40,7 @@ it('applies the published regional surcharge table', function (PricingRegion $re
 ]);
 
 it('keeps fractional surcharges exact to the cent', function () {
-    $price = (new TravelInsurancePricer)->price(7, PricingRegion::Asia);
+    $price = (new PremiumCalculator)->price(7, PricingRegion::Asia);
 
     expect($price->base->toDecimal())->toBe('21.00')
         ->and($price->surcharge->toDecimal())->toBe('5.25')
@@ -48,6 +48,6 @@ it('keeps fractional surcharges exact to the cent', function () {
 });
 
 it('rejects a trip outside the allowed length', function (int $days) {
-    expect(fn () => (new TravelInsurancePricer)->price($days, PricingRegion::Europe))
-        ->toThrow(InvalidTripDuration::class);
+    expect(fn () => (new PremiumCalculator)->price($days, PricingRegion::Europe))
+        ->toThrow(InvalidTripPeriod::class);
 })->with([0, -1, 366]);

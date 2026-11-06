@@ -1,6 +1,6 @@
 <?php
 
-use App\Domain\Quotes\QuoteStatus;
+use App\Domain\QuoteStatus;
 use App\Models\Quote;
 use Illuminate\Support\Facades\Log;
 

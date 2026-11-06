@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Domain\Countries\CountryData;
+use App\Domain\Country as CountryData;
+use App\Infrastructure\Countries\BundledCountryCatalog;
 use App\Models\Country;
-use App\Services\Countries\BundledCountryCatalog;
 use Illuminate\Database\Seeder;
 
 class CountrySeeder extends Seeder

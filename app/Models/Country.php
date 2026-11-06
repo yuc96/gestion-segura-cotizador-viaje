@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Domain\Countries\CountryData;
-use App\Domain\Pricing\PricingRegion;
+use App\Domain\PricingRegion;
 use Database\Factories\CountryFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -25,17 +24,5 @@ class Country extends Model
         return [
             'pricing_region' => PricingRegion::class,
         ];
-    }
-
-    public function toData(): CountryData
-    {
-        return new CountryData(
-            code: $this->code,
-            name: $this->name,
-            region: $this->region,
-            subregion: $this->subregion,
-            pricingRegion: $this->pricing_region,
-            flagEmoji: (string) $this->flag_emoji,
-        );
     }
 }

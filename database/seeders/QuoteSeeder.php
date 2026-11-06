@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Actions\Quotes\ContractQuote;
-use App\Actions\Quotes\CreateQuote;
-use App\Actions\Quotes\CreateQuoteData;
+use App\Application\ContractQuote;
+use App\Application\CreateQuote;
+use App\Application\CreateQuoteCommand;
 use App\Models\Quote;
 use Illuminate\Database\Seeder;
 
@@ -38,7 +38,7 @@ class QuoteSeeder extends Seeder
             $departure = now()->startOfDay()->addDays($startsIn);
             $return = $departure->copy()->addDays($extraDays);
 
-            $quote = $create->handle(new CreateQuoteData(
+            $quote = $create->handle(new CreateQuoteCommand(
                 firstName: $first,
                 lastName: $last,
                 identification: $identification,
@@ -50,7 +50,7 @@ class QuoteSeeder extends Seeder
             ));
 
             if ($shouldContract) {
-                $contract->handle($quote);
+                $contract->handle((int) $quote->id, now()->toDateTimeImmutable());
             }
         }
     }

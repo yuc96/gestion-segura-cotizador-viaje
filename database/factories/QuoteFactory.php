@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
-use App\Domain\Pricing\PricingRegion;
-use App\Domain\Pricing\TravelInsurancePricer;
-use App\Domain\Quotes\QuoteStatus;
+use App\Domain\PremiumCalculator;
+use App\Domain\PricingRegion;
+use App\Domain\QuoteStatus;
 use App\Models\Insured;
 use App\Models\Quote;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,7 +23,7 @@ class QuoteFactory extends Factory
     {
         $departure = now()->startOfDay()->addDays(30);
         $return = $departure->copy()->addDays(9);
-        $price = app(TravelInsurancePricer::class)->price(10, PricingRegion::Europe);
+        $price = app(PremiumCalculator::class)->price(10, PricingRegion::Europe);
 
         return [
             'insured_id' => Insured::factory(),

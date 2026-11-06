@@ -1,13 +1,13 @@
 <?php
 
-use App\Domain\Countries\CountryProviderException;
-use App\Domain\Pricing\PricingRegion;
-use App\Domain\Pricing\RegionResolver;
-use App\Services\Countries\CountryResponseNormalizer;
+use App\Domain\Exception\CountryProviderException;
+use App\Domain\PricingRegion;
+use App\Domain\RegionSurchargePolicy;
+use App\Infrastructure\Countries\CountryResponseNormalizer;
 
 function normalizer(): CountryResponseNormalizer
 {
-    return new CountryResponseNormalizer(new RegionResolver);
+    return new CountryResponseNormalizer(new RegionSurchargePolicy);
 }
 
 it('reads the graphql catalog and skips a malformed row', function () {

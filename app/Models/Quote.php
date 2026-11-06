@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Domain\Pricing\PricingRegion;
-use App\Domain\Quotes\QuoteStatus;
+use App\Domain\PricingRegion;
+use App\Domain\QuoteStatus;
 use Database\Factories\QuoteFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

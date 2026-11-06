@@ -1,8 +1,9 @@
 <?php
 
-use App\Domain\Pricing\InvalidTripDuration;
-use App\Exceptions\QuoteAlreadyContracted;
-use App\Exceptions\UnknownDestination;
+use App\Domain\Exception\InvalidTripPeriod;
+use App\Domain\Exception\QuoteAlreadyContracted;
+use App\Domain\Exception\QuoteNotFound;
+use App\Domain\Exception\UnknownDestination;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -43,7 +44,15 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (InvalidTripDuration $exception, Request $request) {
+        $exceptions->render(function (QuoteNotFound $exception, Request $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'message' => 'No se encontró el registro solicitado.',
+                ], 404);
+            }
+        });
+
+        $exceptions->render(function (InvalidTripPeriod $exception, Request $request) {
             if ($request->is('api/*') || $request->expectsJson()) {
                 return response()->json([
                     'message' => $exception->getMessage(),

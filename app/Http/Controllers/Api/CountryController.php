@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Api;
 
-use App\Domain\Countries\CountryData;
+use App\Application\GetCountries;
+use App\Domain\Country;
 use App\Http\Controllers\Controller;
-use App\Services\Countries\CountryCatalog;
 use Illuminate\Http\JsonResponse;
 
 final class CountryController extends Controller
 {
-    public function index(CountryCatalog $catalog): JsonResponse
+    public function index(GetCountries $action): JsonResponse
     {
-        $result = $catalog->get();
+        $result = $action->handle();
 
         return response()->json([
-            'data' => array_map(fn (CountryData $country): array => [
+            'data' => array_map(fn (Country $country): array => [
                 'code' => $country->code,
                 'name' => $country->name,
                 'region' => $country->region,

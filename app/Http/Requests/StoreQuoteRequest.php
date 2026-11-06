@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Requests;
 
-use App\Domain\Pricing\InvalidTripDuration;
-use App\Domain\Pricing\TripDuration;
+use App\Domain\Exception\InvalidTripPeriod;
+use App\Domain\TripPeriod;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
@@ -112,8 +112,8 @@ class StoreQuoteRequest extends FormRequest
             }
 
             try {
-                app(TripDuration::class)->inclusiveDays($departure, $return);
-            } catch (InvalidTripDuration $exception) {
+                TripPeriod::inclusive($departure, $return);
+            } catch (InvalidTripPeriod $exception) {
                 $validator->errors()->add('return_date', $exception->getMessage());
             }
         });

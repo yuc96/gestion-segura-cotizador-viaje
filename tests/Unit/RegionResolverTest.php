@@ -1,10 +1,10 @@
 <?php
 
-use App\Domain\Pricing\PricingRegion;
-use App\Domain\Pricing\RegionResolver;
+use App\Domain\PricingRegion;
+use App\Domain\RegionSurchargePolicy;
 
-it('maps REST Countries regions onto the tariff table', function (?string $region, ?string $subregion, PricingRegion $expected) {
-    expect((new RegionResolver)->resolve($region, $subregion))->toBe($expected);
+it('maps regions onto the tariff table', function (?string $region, ?string $subregion, PricingRegion $expected) {
+    expect((new RegionSurchargePolicy)->resolve($region, $subregion))->toBe($expected);
 })->with([
     'Ecuador' => ['Americas', 'South America', PricingRegion::SouthAmerica],
     'United States' => ['Americas', 'North America', PricingRegion::NorthAmerica],
