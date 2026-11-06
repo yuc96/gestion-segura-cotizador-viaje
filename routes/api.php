@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/countries', [CountryController::class, 'index']);
 Route::get('/pricing', [PricingController::class, 'show']);
-Route::get('/user', [SessionController::class, 'show'])->middleware('auth:sanctum');
+Route::get('/user', [SessionController::class, 'show']);
 
 Route::get('/quotes', [QuoteController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/quotes', [QuoteController::class, 'store']);
