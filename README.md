@@ -78,20 +78,28 @@ Pest ejecuta las pruebas sobre SQLite en memoria. El esquema no usa tipos exclus
 
 ## Arquitectura
 
-La interfaz es una SPA de Vue servida por Laravel. El navegador habla con un API JSON en `/api`. Así los controladores no renderizan HTML de negocio y las pruebas de Pest ejercitan el mismo contrato que usa la pantalla.
+Es una arquitectura hexagonal ligera. El dominio no conoce Laravel: la prima, el periodo del viaje y el estado de la cotización se pueden probar con Pest sin levantar el framework. El caso de uso depende de puertos (`QuoteRepository`, `CountryProvider`, `PdfGenerator`), así que cambiar el proveedor de países o el generador de PDF no toca la regla de negocio. HTTP es solo un adaptador de entrada.
+
+```mermaid
+flowchart LR
+  Vue[Vue] --> Http[Http controllers]
+  Http --> App[Application use cases]
+  App --> Domain[Domain]
+  App --> Ports[Ports]
+  Ports --> Eloquent[EloquentQuoteRepository]
+  Ports --> Countries[GraphqlCountryProvider]
+  Ports --> Pdf[DompdfQuotePdf]
+```
 
 ```
-app/Domain/Pricing        Tarifa, días y región. Sin HTTP ni Eloquent.
-app/Domain/Countries      Datos de país y errores del proveedor.
-app/Domain/Quotes         Estados Cotizado y Contratado.
-app/Actions/Quotes        Crear la cotización, contratarla y renderizar el PDF.
-app/Services/Countries    Cliente HTTP, normalizador y catálogo con respaldo.
-app/Queries               Listado filtrado.
-app/Http                  Form Requests, controladores delgados y resources.
-resources/js              Vue 3 + TypeScript, Vue Router y Pinia. Sin cálculo de prima.
+app/Domain            PHP puro: Quote, TripPeriod, Money, PremiumCalculator, RegionSurchargePolicy, QuoteStatus.
+app/Application       Casos de uso y puertos.
+app/Infrastructure    Adaptadores: Eloquent, GraphQL con caché y respaldo, Dompdf, log JSON.
+app/Http              Form Requests, controladores y el presentador JSON.
+resources/js          Vue 3 + TypeScript, Vue Router y Pinia. Sin cálculo de prima.
 ```
 
-Los controladores reciben el request, llaman a una acción o a una consulta y devuelven un resource. Vue valida el formulario para responder al instante, pero el precio, los días y la región salen siempre del servidor.
+Los puertos se enlazan en `AppServiceProvider`. El controlador no calcula ni consulta Eloquent: arma el comando, llama al caso de uso y presenta el resultado. Vue valida el formulario para responder al instante, pero el precio sale del dominio.
 
 Cada cotización guarda su propio asegurado (`insureds` 1—N `quotes`). Es una foto del momento: una cotización posterior no reescribe el nombre ni la prima de la anterior. En la cotización también quedan el código y el nombre del destino, la región tarifaria, los días, la tarifa diaria aplicada, la base, el porcentaje, el recargo y el total. Si mañana la tarifa deja de ser USD 3, las cotizaciones viejas no cambian.
 
@@ -135,6 +143,15 @@ En el formulario y en el `StoreQuoteRequest`:
 - Nacimiento en el pasado. Entre 18 y 85 años en la fecha de salida.
 - Destino con código ISO existente en el catálogo.
 - Salida hoy o después. Regreso igual o posterior a la salida. Máximo 365 días.
+
+## Marca
+
+Los colores salen del sitio público [gestionsegura.com.ec](https://gestionsegura.com.ec/), de las variables del tema Insur:
+
+- Primario `#fcb333` (`--insur-primary`), botones y acentos.
+- Base `#233266` (`--insur-base`), paneles.
+- Negro `#16243d` (`--insur-black`), cabecera y texto de botón.
+- Fuente [DM Sans](https://fonts.google.com/specimen/DM+Sans), la que declara el tema (`insur-fonts`). No se copió el archivo del logo: el encabezado es un wordmark.
 
 ## Decisiones
 

@@ -1,14 +1,14 @@
 @import 'tailwindcss';
 
 @theme {
-    --font-sans: 'Source Sans 3', 'Segoe UI', sans-serif;
-    --font-serif: Fraunces, Georgia, serif;
-    --color-navy-950: #0d1b2e;
-    --color-navy-900: #14304f;
-    --color-navy-700: #24527a;
-    --color-gold-600: #8a6a12;
-    --color-gold-500: #d89b12;
-    --color-gold-100: #f8e7c0;
+    --font-sans: 'DM Sans', 'Segoe UI', sans-serif;
+    --font-serif: 'DM Sans', 'Segoe UI', sans-serif;
+    --color-navy-950: #16243d;
+    --color-navy-900: #233266;
+    --color-navy-700: #314680;
+    --color-gold-600: #8a5a10;
+    --color-gold-500: #fcb333;
+    --color-gold-100: #fff4dc;
     --color-paper: #f3efe6;
     --color-card: #fffdf8;
     --color-ink: #1c1915;
@@ -66,12 +66,12 @@ body {
 }
 
 .btn-primary {
-    background: var(--color-navy-900);
-    color: white;
+    background: var(--color-gold-500);
+    color: var(--color-navy-950);
 }
 
 .btn-primary:hover:not(:disabled) {
-    background: var(--color-navy-950);
+    background: #e5a42d;
 }
 
 .btn-gold {

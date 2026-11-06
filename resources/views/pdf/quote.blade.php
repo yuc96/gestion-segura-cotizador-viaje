@@ -6,19 +6,19 @@
     <style>
         @page { margin: 32px 36px; }
         body { font-family: DejaVu Sans, sans-serif; color: #1c1915; font-size: 12px; line-height: 1.45; }
-        h1 { font-size: 22px; margin: 0; color: #14304f; }
-        h2 { font-size: 13px; margin: 0 0 8px; color: #14304f; letter-spacing: 0.04em; text-transform: uppercase; }
-        .brand { font-size: 11px; letter-spacing: 0.16em; color: #8a6a12; font-weight: bold; }
+        h1 { font-size: 22px; margin: 0; color: #233266; }
+        h2 { font-size: 13px; margin: 0 0 8px; color: #233266; letter-spacing: 0.04em; text-transform: uppercase; }
+        .brand { font-size: 11px; letter-spacing: 0.16em; color: #8a5a10; font-weight: bold; }
         .muted { color: #5e584e; }
-        .rule { height: 3px; background: #d89b12; margin: 14px 0 18px; }
+        .rule { height: 3px; background: #fcb333; margin: 14px 0 18px; }
         table { width: 100%; border-collapse: collapse; }
         .meta td { vertical-align: top; padding: 0; }
         .box { border: 1px solid #e3d9c6; padding: 12px 14px; }
         .box + .box { margin-top: 12px; }
         .lines td { padding: 6px 0; border-bottom: 1px solid #eee6d8; }
         .lines td:last-child { text-align: right; }
-        .total td { padding-top: 10px; font-size: 16px; font-weight: bold; color: #14304f; border-bottom: none; }
-        .status { display: inline-block; padding: 3px 8px; border: 1px solid #d89b12; color: #8a6a12; font-size: 11px; font-weight: bold; }
+        .total td { padding-top: 10px; font-size: 16px; font-weight: bold; color: #233266; border-bottom: none; }
+        .status { display: inline-block; padding: 3px 8px; border: 1px solid #fcb333; color: #8a5a10; font-size: 11px; font-weight: bold; }
         .foot { margin-top: 22px; font-size: 10px; color: #5e584e; }
     </style>
 </head>
@@ -32,9 +32,9 @@
             </td>
             <td style="text-align: right;">
                 <div class="status">{{ $quote->status->value }}</div>
-                <div class="muted" style="margin-top: 8px;">Emitida {{ $quote->created_at?->timezone(config('app.timezone'))->format('d/m/Y H:i') }}</div>
-                @if ($quote->contracted_at)
-                    <div class="muted">Contratada {{ $quote->contracted_at->timezone(config('app.timezone'))->format('d/m/Y H:i') }}</div>
+                <div class="muted" style="margin-top: 8px;">Emitida {{ $quote->createdAt?->format('d/m/Y H:i') }}</div>
+                @if ($quote->contractedAt)
+                    <div class="muted">Contratada {{ $quote->contractedAt->format('d/m/Y H:i') }}</div>
                 @endif
             </td>
         </tr>
@@ -46,32 +46,32 @@
         <div><strong>{{ $quote->insured->fullName() }}</strong></div>
         <div>Identificación: {{ $quote->insured->identification }}</div>
         <div>Correo: {{ $quote->insured->email }}</div>
-        <div>Nacimiento: {{ $quote->insured->birth_date?->format('d/m/Y') }}</div>
+        <div>Nacimiento: {{ \DateTimeImmutable::createFromFormat('Y-m-d', $quote->insured->birthDate)->format('d/m/Y') }}</div>
     </div>
 
     <div class="box">
         <h2>Viaje</h2>
-        <div><strong>{{ $quote->destination_name }}</strong> ({{ $quote->destination_code }})</div>
-        <div>Región tarifaria: {{ $quote->pricing_region->label() }}</div>
-        <div>Salida: {{ $quote->departure_date?->format('d/m/Y') }}</div>
-        <div>Regreso: {{ $quote->return_date?->format('d/m/Y') }}</div>
-        <div>Días cubiertos: {{ $quote->trip_days }}</div>
+        <div><strong>{{ $quote->destination->name }}</strong> ({{ $quote->destination->code }})</div>
+        <div>Región tarifaria: {{ $quote->destination->pricingRegion->label() }}</div>
+        <div>Salida: {{ $quote->trip->departure->format('d/m/Y') }}</div>
+        <div>Regreso: {{ $quote->trip->return->format('d/m/Y') }}</div>
+        <div>Días cubiertos: {{ $quote->trip->days }}</div>
     </div>
 
     <div class="box">
         <h2>Prima</h2>
         <table class="lines">
             <tr>
-                <td>Tarifa base ({{ $quote->trip_days }} días × USD {{ number_format($quote->daily_rate_cents / 100, 2) }})</td>
-                <td>USD {{ number_format($quote->base_amount_cents / 100, 2) }}</td>
+                <td>Tarifa base ({{ $quote->trip->days }} días × USD {{ $quote->premium->dailyRate->toDecimal() }})</td>
+                <td>USD {{ $quote->premium->base->toDecimal() }}</td>
             </tr>
             <tr>
-                <td>Recargo {{ $quote->pricing_region->label() }} ({{ $quote->surcharge_percent }}%)</td>
-                <td>USD {{ number_format($quote->surcharge_amount_cents / 100, 2) }}</td>
+                <td>Recargo {{ $quote->premium->region->label() }} ({{ $quote->premium->surchargePercent }}%)</td>
+                <td>USD {{ $quote->premium->surcharge->toDecimal() }}</td>
             </tr>
             <tr class="total">
                 <td>Total</td>
-                <td>USD {{ number_format($quote->total_amount_cents / 100, 2) }}</td>
+                <td>USD {{ $quote->premium->total->toDecimal() }}</td>
             </tr>
         </table>
     </div>

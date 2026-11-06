@@ -6,7 +6,7 @@
     <meta name="description" content="Cotiza y contrata un seguro de viaje con Gestión Segura.">
     <title>Gestión Segura — Seguro de viaje</title>
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=fraunces:500,600,700|source-sans-3:400,500,600,700" rel="stylesheet">
+    <link href="https://fonts.bunny.net/css?family=dm-sans:400,500,600,700" rel="stylesheet">
     @vite(['resources/css/app.css', 'resources/js/app.ts'])
 </head>
 <body>
