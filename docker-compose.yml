@@ -19,7 +19,8 @@ services:
       CACHE_STORE: file
       SESSION_DRIVER: file
       QUEUE_CONNECTION: sync
-      RESTCOUNTRIES_API_KEY: ${RESTCOUNTRIES_API_KEY:-}
+      COUNTRIES_API_URL: https://countries.trevorblades.com/
+      SANCTUM_STATEFUL_DOMAINS: localhost,localhost:43123,127.0.0.1,127.0.0.1:43123,127.0.0.1:8000
     depends_on:
       mysql:
         condition: service_healthy
@@ -32,7 +33,7 @@ services:
       MYSQL_PASSWORD: seguro
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "33060:3306"
+      - "33061:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-proot"]
       interval: 5s
