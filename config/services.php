@@ -35,4 +35,12 @@ return [
         ],
     ],
 
+    'restcountries' => [
+        'base_url' => env('RESTCOUNTRIES_BASE_URL', 'https://api.restcountries.com'),
+        'key' => env('RESTCOUNTRIES_API_KEY'),
+        'timeout' => (int) env('RESTCOUNTRIES_TIMEOUT', 8),
+        'cache_ttl_minutes' => (int) env('RESTCOUNTRIES_CACHE_TTL', 720),
+        'failure_ttl_minutes' => (int) env('RESTCOUNTRIES_FAILURE_TTL', 10),
+    ],
+
 ];
