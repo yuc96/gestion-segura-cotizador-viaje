@@ -2,22 +2,7 @@
 
 use App\Domain\Quotes\QuoteStatus;
 use App\Models\Quote;
-
-function quotePayload(array $overrides = []): array
-{
-    $departure = now()->startOfDay()->addDays(30);
-
-    return array_merge([
-        'first_name' => 'María José',
-        'last_name' => 'Pérez-García',
-        'identification' => 'ab12cd34',
-        'email' => 'Maria.Jose@Example.com',
-        'birth_date' => '1990-04-12',
-        'destination_code' => 'es',
-        'departure_date' => $departure->toDateString(),
-        'return_date' => $departure->copy()->addDays(9)->toDateString(),
-    ], $overrides);
-}
+use Illuminate\Support\Facades\Log;
 
 it('quotes a ten day trip to Spain at 36 dollars', function () {
     $response = $this->postJson('/api/quotes', quotePayload());
@@ -163,7 +148,27 @@ it('shows one quote and a json 404 when it does not exist', function () {
     $this->getJson('/api/quotes/999999')->assertNotFound();
 });
 
+it('keeps the quote list private and records the contract as json', function () {
+    $this->getJson('/api/quotes', ['Origin' => 'http://localhost'])->assertUnauthorized();
+
+    $path = storage_path('logs/structured-quote-test.log');
+    @unlink($path);
+    config(['logging.channels.json.handler_with.stream' => $path]);
+    Log::forgetChannel('json');
+
+    $id = $this->postJson('/api/quotes', quotePayload())->json('data.id');
+    $this->postJson("/api/quotes/{$id}/contract")->assertOk();
+
+    $raw = (string) file_get_contents($path);
+    expect($raw)->toContain('"quote.created"')
+        ->and($raw)->toContain('"quote.contracted"')
+        ->and($raw)->toContain('"total_cents":3600');
+
+    @unlink($path);
+});
+
 it('filters and paginates the quote list', function () {
+    loginAsAdmin();
     $match = Quote::factory()->create();
     $match->insured->update([
         'first_name' => 'Camila',
@@ -205,6 +210,7 @@ it('filters and paginates the quote list', function () {
 });
 
 it('filters by departure date', function () {
+    loginAsAdmin();
     $inside = Quote::factory()->create([
         'departure_date' => '2026-12-15',
         'return_date' => '2026-12-20',

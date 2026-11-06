@@ -3,12 +3,14 @@
 use App\Http\Controllers\Api\CountryController;
 use App\Http\Controllers\Api\PricingController;
 use App\Http\Controllers\Api\QuoteController;
+use App\Http\Controllers\Auth\SessionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/countries', [CountryController::class, 'index']);
 Route::get('/pricing', [PricingController::class, 'show']);
+Route::get('/user', [SessionController::class, 'show'])->middleware('auth:sanctum');
 
-Route::get('/quotes', [QuoteController::class, 'index']);
+Route::get('/quotes', [QuoteController::class, 'index'])->middleware('auth:sanctum');
 Route::post('/quotes', [QuoteController::class, 'store']);
 Route::get('/quotes/{quote}', [QuoteController::class, 'show']);
 Route::post('/quotes/{quote}/contract', [QuoteController::class, 'contract']);
