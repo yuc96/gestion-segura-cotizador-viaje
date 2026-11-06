@@ -234,17 +234,17 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocumentPointe
                 :id="`country-opt-${country.code}`"
                 :key="country.code"
                 role="option"
-                class="flex min-h-11 w-full cursor-pointer items-center justify-between gap-3 px-3 py-2.5 text-left text-sm"
+                class="country-option"
                 :class="index === active ? 'bg-gold-100' : 'hover:bg-paper'"
                 :aria-selected="country.code === modelValue"
                 @mouseenter="active = index"
                 @mousedown.prevent="choose(country)"
             >
-                <span class="min-w-0">
+                <span class="country-option-name">
                     <span aria-hidden="true">{{ country.flag_emoji }}</span>
                     {{ country.name }}
                 </span>
-                <span class="shrink-0 text-xs text-muted">{{ country.pricing_region_label }} · {{ country.surcharge_percent }}%</span>
+                <span class="country-option-meta">{{ country.pricing_region_label }} · {{ country.surcharge_percent }}%</span>
             </li>
         </ul>
 

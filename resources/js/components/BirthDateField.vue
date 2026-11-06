@@ -92,7 +92,7 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocumentClick)
 
 <template>
     <div ref="root" class="relative">
-        <div class="flex gap-2">
+        <div class="birth-row">
             <input
                 class="field-input"
                 inputmode="numeric"
@@ -103,28 +103,28 @@ onBeforeUnmount(() => document.removeEventListener('mousedown', onDocumentClick)
                 :aria-invalid="invalid || Boolean(formatError)"
                 @input="onInput"
             >
-            <button class="btn btn-ghost shrink-0 px-3" type="button" aria-label="Abrir calendario" @click="open = !open">
+            <button class="btn btn-ghost" type="button" aria-label="Abrir calendario" @click="open = !open">
                 Calendario
             </button>
         </div>
-        <p v-if="formatError" class="mt-1 text-sm text-danger">{{ formatError }}</p>
-        <div v-if="open" class="absolute z-20 mt-2 w-full rounded-2xl border border-line bg-white p-3 shadow-lg sm:w-80">
-            <div class="grid grid-cols-2 gap-2">
-                <label class="text-xs font-semibold text-muted">
-                    Mes
-                    <select v-model.number="viewMonth" class="field-input mt-1">
+        <p v-if="formatError" class="field-error">{{ formatError }}</p>
+        <div v-if="open" class="calendar-pop">
+            <div class="calendar-fields">
+                <label>
+                    <span class="field-name">Mes</span>
+                    <select v-model.number="viewMonth" class="field-input">
                         <option v-for="(month, index) in MONTHS_ES" :key="month" :value="index">{{ month }}</option>
                     </select>
                 </label>
-                <label class="text-xs font-semibold text-muted">
-                    Año
-                    <input v-model.number="viewYear" class="field-input mt-1" type="number" min="1900" :max="today.getFullYear()" inputmode="numeric">
+                <label>
+                    <span class="field-name">Año</span>
+                    <input v-model.number="viewYear" class="field-input" type="number" min="1900" :max="today.getFullYear()" inputmode="numeric">
                 </label>
             </div>
-            <div class="mt-3 flex items-center justify-between text-sm">
-                <button class="btn btn-ghost px-2 py-1" type="button" @click="shiftMonth(-1)">Anterior</button>
-                <span class="font-semibold capitalize">{{ MONTHS_ES[viewMonth] }} {{ viewYear }}</span>
-                <button class="btn btn-ghost px-2 py-1" type="button" @click="shiftMonth(1)">Siguiente</button>
+            <div class="calendar-nav">
+                <button class="btn btn-ghost" type="button" @click="shiftMonth(-1)">Anterior</button>
+                <span class="font-semibold">{{ MONTHS_ES[viewMonth] }} {{ viewYear }}</span>
+                <button class="btn btn-ghost" type="button" @click="shiftMonth(1)">Siguiente</button>
             </div>
             <div class="mt-2 grid grid-cols-7 gap-1 text-center text-xs text-muted">
                 <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span><span>Sa</span><span>Do</span>

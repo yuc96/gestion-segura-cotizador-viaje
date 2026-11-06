@@ -22,29 +22,29 @@ async function logout() {
 
 <template>
     <div class="min-h-screen">
-        <header class="border-b border-line bg-navy-950 text-white">
-            <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:px-6">
-                <RouterLink to="/" class="flex min-w-0 items-center gap-3 text-white no-underline">
-                    <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-gold-500 font-serif text-xl font-semibold text-navy-950">G</span>
+        <header class="site-header">
+            <div class="shell site-bar">
+                <RouterLink to="/" class="brand">
+                    <span class="brand-mark">G</span>
                     <span class="min-w-0">
-                        <span class="block truncate font-serif text-lg leading-none tracking-wide">Gestión Segura</span>
-                        <span class="mt-1 block text-xs uppercase tracking-[0.18em] text-gold-100">Seguro de viaje</span>
+                        <span class="brand-name">Gestión Segura</span>
+                        <span class="brand-tag">Seguro de viaje</span>
                     </span>
                 </RouterLink>
-                <nav class="flex flex-wrap items-center gap-2 text-sm font-semibold">
-                    <RouterLink to="/" class="rounded-full px-3 py-2 text-white/80 no-underline" exact-active-class="bg-white/10 text-white">Cotizar</RouterLink>
-                    <RouterLink v-if="auth.user" to="/listado" class="rounded-full px-3 py-2 text-white/80 no-underline" active-class="bg-white/10 text-white">Listado</RouterLink>
-                    <button v-if="auth.user" class="rounded-full px-3 py-2 text-white/80" type="button" @click="logout">Salir</button>
-                    <RouterLink v-else to="/ingresar" class="rounded-full px-3 py-2 text-white/80 no-underline" active-class="bg-white/10 text-white">Ingresar</RouterLink>
+                <nav class="site-nav">
+                    <RouterLink to="/" class="nav-link" exact-active-class="is-current">Cotizar</RouterLink>
+                    <RouterLink v-if="auth.user" to="/listado" class="nav-link" active-class="is-current">Listado</RouterLink>
+                    <button v-if="auth.user" class="nav-link" type="button" @click="logout">Salir</button>
+                    <RouterLink v-else to="/ingresar" class="nav-link" active-class="is-current">Ingresar</RouterLink>
                 </nav>
             </div>
         </header>
 
-        <main class="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6">
+        <main class="shell shell-main">
             <RouterView />
         </main>
 
-        <footer class="mx-auto max-w-6xl px-4 pb-10 text-sm text-muted sm:px-6">
+        <footer class="shell shell-footer">
             Cotización de referencia. No procesa pagos ni emite una póliza real.
         </footer>
     </div>

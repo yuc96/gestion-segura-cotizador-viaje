@@ -31,73 +31,77 @@ watch(() => props.id, load);
 </script>
 
 <template>
-    <p v-if="quotes.loading" class="text-muted">Cargando la cotización…</p>
+    <p v-if="quotes.loading" class="muted">Cargando la cotización…</p>
 
-    <div v-else-if="quotes.error && !quotes.current" class="rounded-3xl border border-line bg-card p-8">
-        <h1 class="font-serif text-3xl text-navy-950">No encontramos esa cotización</h1>
-        <p class="mt-2 text-muted">{{ quotes.error }}</p>
-        <RouterLink to="/" class="btn btn-primary mt-6">Nueva cotización</RouterLink>
+    <div v-else-if="quotes.error && !quotes.current" class="card">
+        <h1 class="page-title">No encontramos esa cotización</h1>
+        <p class="subline">{{ quotes.error }}</p>
+        <div class="actions">
+            <RouterLink to="/" class="btn btn-primary">Nueva cotización</RouterLink>
+        </div>
     </div>
 
-    <article v-else-if="quotes.current" class="grid gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(18rem,0.7fr)]">
-        <section class="rounded-3xl border border-line bg-card p-6 sm:p-8">
-            <div class="flex flex-wrap items-center gap-3">
-                <p class="text-sm font-semibold uppercase tracking-[0.16em] text-gold-600">{{ quotes.current.number }}</p>
+    <article v-else-if="quotes.current" class="split split-show">
+        <section class="card">
+            <div class="cluster">
+                <p class="eyebrow">{{ quotes.current.number }}</p>
                 <StatusBadge :status="quotes.current.status" />
             </div>
-            <h1 class="mt-3 font-serif text-4xl text-navy-950">
+            <h1 class="page-title">
                 {{ quotes.current.destination.flag_emoji }} {{ quotes.current.destination.name }}
             </h1>
-            <p class="mt-2 text-muted">
+            <p class="subline">
                 {{ quotes.current.insured.full_name }} · {{ quotes.current.insured.identification }}
             </p>
 
-            <dl class="mt-8 grid gap-4 sm:grid-cols-2">
+            <dl class="facts">
                 <div>
-                    <dt class="text-xs uppercase tracking-wide text-muted">Salida</dt>
-                    <dd class="text-lg font-semibold">{{ formatDate(quotes.current.departure_date) }}</dd>
+                    <dt>Salida</dt>
+                    <dd class="fact-value">{{ formatDate(quotes.current.departure_date) }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs uppercase tracking-wide text-muted">Regreso</dt>
-                    <dd class="text-lg font-semibold">{{ formatDate(quotes.current.return_date) }}</dd>
+                    <dt>Regreso</dt>
+                    <dd class="fact-value">{{ formatDate(quotes.current.return_date) }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs uppercase tracking-wide text-muted">Días</dt>
-                    <dd class="text-lg font-semibold">{{ quotes.current.trip_days }}</dd>
+                    <dt>Días</dt>
+                    <dd class="fact-value">{{ quotes.current.trip_days }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs uppercase tracking-wide text-muted">Región tarifaria</dt>
-                    <dd class="text-lg font-semibold">{{ quotes.current.destination.pricing_region_label }}</dd>
+                    <dt>Región tarifaria</dt>
+                    <dd class="fact-value">{{ quotes.current.destination.pricing_region_label }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs uppercase tracking-wide text-muted">Correo</dt>
+                    <dt>Correo</dt>
                     <dd>{{ quotes.current.insured.email }}</dd>
                 </div>
                 <div>
-                    <dt class="text-xs uppercase tracking-wide text-muted">Nacimiento</dt>
+                    <dt>Nacimiento</dt>
                     <dd>{{ formatDate(quotes.current.insured.birth_date) }}</dd>
                 </div>
             </dl>
         </section>
 
-        <aside class="h-fit rounded-3xl border border-line bg-card p-6">
-            <p class="text-xs font-semibold uppercase tracking-[0.16em] text-gold-600">Prima</p>
-            <p class="mt-2 font-serif text-4xl text-navy-950">{{ formatUsd(quotes.current.pricing.total_amount) }}</p>
-            <dl class="mt-4 space-y-2 text-sm">
-                <div class="flex justify-between gap-4">
+        <aside class="card split-aside is-sticky">
+            <p class="eyebrow">Prima</p>
+            <p class="page-title">{{ formatUsd(quotes.current.pricing.total_amount) }}</p>
+            <dl class="price-lines">
+                <div>
                     <dt>Base ({{ quotes.current.trip_days }} × {{ formatUsd(quotes.current.pricing.daily_rate) }})</dt>
                     <dd>{{ formatUsd(quotes.current.pricing.base_amount) }}</dd>
                 </div>
-                <div class="flex justify-between gap-4">
+                <div>
                     <dt>Recargo {{ quotes.current.pricing.surcharge_percent }}%</dt>
                     <dd>{{ formatUsd(quotes.current.pricing.surcharge_amount) }}</dd>
                 </div>
             </dl>
-            <p class="mt-4 text-xs text-muted">Creada {{ formatDateTime(quotes.current.created_at) }}</p>
-            <p v-if="quotes.current.contracted_at" class="text-xs text-ok">Contratada {{ formatDateTime(quotes.current.contracted_at) }}</p>
-            <p class="mt-3 text-sm text-muted">El PDF usa la prima ya guardada. Contratar no cobra: solo cambia el estado.</p>
+            <div class="price-meta">
+                <p class="fine">Creada {{ formatDateTime(quotes.current.created_at) }}</p>
+                <p v-if="quotes.current.contracted_at" class="ok-line">Contratada {{ formatDateTime(quotes.current.contracted_at) }}</p>
+                <p>El PDF usa la prima ya guardada. Contratar no cobra: solo cambia el estado.</p>
+            </div>
 
-            <div class="mt-6 flex flex-col gap-3">
+            <div class="actions is-stack">
                 <a class="btn btn-ghost" :href="`/api/quotes/${quotes.current.id}/pdf`">Descargar PDF</a>
                 <button
                     v-if="quotes.current.status === 'Cotizado' && !confirming"
@@ -109,10 +113,10 @@ watch(() => props.id, load);
                 </button>
             </div>
 
-            <div v-if="confirming" class="mt-4 rounded-2xl bg-paper p-4">
-                <p class="text-sm">Se registrará el seguro con el total ya cotizado. No hay pasarela de pago.</p>
-                <p v-if="quotes.error" class="mt-2 text-sm text-danger">{{ quotes.error }}</p>
-                <div class="mt-3 flex flex-wrap gap-2">
+            <div v-if="confirming" class="confirm">
+                <p>Se registrará el seguro con el total ya cotizado. No hay pasarela de pago.</p>
+                <p v-if="quotes.error" class="form-error">{{ quotes.error }}</p>
+                <div class="actions is-stack">
                     <button class="btn btn-primary" type="button" :disabled="quotes.saving" @click="contract">
                         {{ quotes.saving ? 'Guardando…' : 'Confirmar contratación' }}
                     </button>
