@@ -1,9 +1,110 @@
 @import 'tailwindcss';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Source Sans 3', 'Segoe UI', sans-serif;
+    --font-serif: Fraunces, Georgia, serif;
+    --color-navy-950: #0d1b2e;
+    --color-navy-900: #14304f;
+    --color-navy-700: #24527a;
+    --color-gold-600: #8a6a12;
+    --color-gold-500: #d89b12;
+    --color-gold-100: #f8e7c0;
+    --color-paper: #f3efe6;
+    --color-card: #fffdf8;
+    --color-ink: #1c1915;
+    --color-muted: #5e584e;
+    --color-line: #e3d9c6;
+    --color-danger: #9f2d2d;
+    --color-ok: #1f6b45;
+    --color-ok-soft: #e5f4ec;
+}
+
+body {
+    margin: 0;
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+}
+
+.field-input {
+    width: 100%;
+    border-radius: 0.7rem;
+    border: 1px solid var(--color-line);
+    background: white;
+    padding: 0.7rem 0.85rem;
+    font: inherit;
+    color: var(--color-ink);
+    outline: none;
+}
+
+.field-input:focus {
+    border-color: var(--color-navy-700);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-gold-500) 35%, transparent);
+}
+
+.field-input[aria-invalid='true'] {
+    border-color: var(--color-danger);
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 999px;
+    padding: 0.75rem 1.15rem;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: progress;
+}
+
+.btn-primary {
+    background: var(--color-navy-900);
+    color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+    background: var(--color-navy-950);
+}
+
+.btn-gold {
+    background: var(--color-gold-500);
+    color: var(--color-navy-950);
+}
+
+.btn-gold:hover:not(:disabled) {
+    background: #e2ab2a;
+}
+
+.btn-ghost {
+    background: transparent;
+    border-color: var(--color-line);
+    color: var(--color-navy-900);
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0.2rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.badge[data-status='Cotizado'] {
+    background: var(--color-gold-100);
+    color: var(--color-gold-600);
+}
+
+.badge[data-status='Contratado'] {
+    background: var(--color-ok-soft);
+    color: var(--color-ok);
 }
