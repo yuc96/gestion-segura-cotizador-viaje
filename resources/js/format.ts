@@ -1,4 +1,4 @@
-export function formatUsd(amount) {
+export function formatUsd(amount: string | number): string {
     const value = Number(amount);
 
     if (Number.isNaN(value)) {
@@ -11,12 +11,16 @@ export function formatUsd(amount) {
     }).format(value);
 }
 
-export function formatDate(value) {
+export function formatDate(value: string | null | undefined): string {
     if (!value) {
         return '—';
     }
 
     const [year, month, day] = value.slice(0, 10).split('-').map(Number);
+
+    if (!year || !month || !day) {
+        return '—';
+    }
 
     return new Intl.DateTimeFormat('es-EC', {
         day: '2-digit',
@@ -25,7 +29,7 @@ export function formatDate(value) {
     }).format(new Date(year, month - 1, day));
 }
 
-export function formatDateTime(value) {
+export function formatDateTime(value: string | null | undefined): string {
     if (!value) {
         return '—';
     }

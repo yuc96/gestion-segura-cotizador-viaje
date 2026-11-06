@@ -1,11 +1,12 @@
 import { defineStore } from 'pinia';
 import { api } from '../api';
+import type { Tariff } from '../types';
 
 export const usePricingStore = defineStore('pricing', {
     state: () => ({
-        tariff: null,
+        tariff: null as Tariff | null,
         loading: false,
-        error: null,
+        error: null as string | null,
     }),
     actions: {
         async load() {
@@ -17,10 +18,10 @@ export const usePricingStore = defineStore('pricing', {
             this.error = null;
 
             try {
-                const payload = await api('/pricing');
+                const payload = await api<{ data: Tariff }>('/pricing');
                 this.tariff = payload.data;
             } catch (error) {
-                this.error = error.message;
+                this.error = error instanceof Error ? error.message : 'No se pudo cargar la tarifa.';
             } finally {
                 this.loading = false;
             }

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import Field from '../components/Field.vue';
@@ -14,7 +14,7 @@ const pricing = usePricingStore();
 const quotes = useQuoteStore();
 
 const countryQuery = ref('');
-const localErrors = reactive({});
+const localErrors = reactive<Record<string, string>>({});
 
 const form = reactive({
     first_name: '',
@@ -57,11 +57,11 @@ const catalogNotice = computed(() => {
     return 'Países cargados desde el catálogo local.';
 });
 
-function errorFor(key) {
+function errorFor(key: string): string {
     return localErrors[key] || firstError(quotes.fieldErrors[key]);
 }
 
-function touch(key) {
+function touch(key: string) {
     delete localErrors[key];
 
     if (quotes.fieldErrors[key]) {

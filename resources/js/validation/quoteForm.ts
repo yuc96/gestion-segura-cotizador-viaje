@@ -1,4 +1,6 @@
-function parseDate(value) {
+import type { QuoteForm } from '../types';
+
+function parseDate(value: string): Date | null {
     if (!value) {
         return null;
     }
@@ -18,14 +20,14 @@ function parseDate(value) {
     return date;
 }
 
-function startOfToday() {
+function startOfToday(): Date {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     return today;
 }
 
-function ageAt(birth, onDate) {
+function ageAt(birth: Date, onDate: Date): number {
     let age = onDate.getFullYear() - birth.getFullYear();
     const month = onDate.getMonth() - birth.getMonth();
 
@@ -38,8 +40,8 @@ function ageAt(birth, onDate) {
 
 const namePattern = /^[\p{L}\s'.-]+$/u;
 
-export function validateQuoteForm(form) {
-    const errors = {};
+export function validateQuoteForm(form: QuoteForm): Record<string, string> {
+    const errors: Record<string, string> = {};
 
     if (!form.first_name || form.first_name.trim().length < 2) {
         errors.first_name = 'Ingresa los nombres del asegurado.';
@@ -88,8 +90,8 @@ export function validateQuoteForm(form) {
         errors.return_date = 'Ingresa la fecha de regreso.';
     } else if (departure && returning < departure) {
         errors.return_date = 'El regreso no puede ser anterior a la salida.';
-    } else if (departure) {
-        const days = Math.round((returning - departure) / 86400000) + 1;
+    } else if (departure && returning) {
+        const days = Math.round((returning.getTime() - departure.getTime()) / 86400000) + 1;
 
         if (days > 365) {
             errors.return_date = 'El viaje no puede superar 365 días.';

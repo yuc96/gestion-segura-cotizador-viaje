@@ -1,13 +1,22 @@
 import { defineStore } from 'pinia';
 import { api } from '../api';
+import type { Country } from '../types';
+
+interface CountryResponse {
+    data: Country[];
+    meta?: {
+        source?: string | null;
+        notice?: string | null;
+    };
+}
 
 export const useCountryStore = defineStore('countries', {
     state: () => ({
-        items: [],
-        source: null,
-        notice: null,
+        items: [] as Country[],
+        source: null as string | null,
+        notice: null as string | null,
         loading: false,
-        error: null,
+        error: null as string | null,
     }),
     actions: {
         async load(force = false) {
@@ -19,12 +28,12 @@ export const useCountryStore = defineStore('countries', {
             this.error = null;
 
             try {
-                const payload = await api('/countries');
+                const payload = await api<CountryResponse>('/countries');
                 this.items = payload.data;
                 this.source = payload.meta?.source ?? null;
                 this.notice = payload.meta?.notice ?? null;
             } catch (error) {
-                this.error = error.message;
+                this.error = error instanceof Error ? error.message : 'No se pudieron cargar los países.';
             } finally {
                 this.loading = false;
             }

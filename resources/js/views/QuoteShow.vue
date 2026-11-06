@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
 import { RouterLink } from 'vue-router';
 import StatusBadge from '../components/StatusBadge.vue';
@@ -95,6 +95,7 @@ watch(() => props.id, load);
             </dl>
             <p class="mt-4 text-xs text-muted">Creada {{ formatDateTime(quotes.current.created_at) }}</p>
             <p v-if="quotes.current.contracted_at" class="text-xs text-ok">Contratada {{ formatDateTime(quotes.current.contracted_at) }}</p>
+            <p class="mt-3 text-sm text-muted">El PDF usa la prima ya guardada. Contratar no cobra: solo cambia el estado.</p>
 
             <div class="mt-6 flex flex-col gap-3">
                 <a class="btn btn-ghost" :href="`/api/quotes/${quotes.current.id}/pdf`">Descargar PDF</a>

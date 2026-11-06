@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { onMounted, reactive } from 'vue';
 import { RouterLink } from 'vue-router';
 import StatusBadge from '../components/StatusBadge.vue';
@@ -34,7 +34,7 @@ function clearFilters() {
     load();
 }
 
-function goTo(page) {
+function goTo(page: number) {
     filters.page = page;
     load();
 }
@@ -47,6 +47,7 @@ onMounted(load);
         <div>
             <p class="text-sm font-semibold uppercase tracking-[0.16em] text-gold-600">Consulta</p>
             <h1 class="mt-2 font-serif text-4xl text-navy-950">Cotizaciones y contrataciones</h1>
+            <p class="mt-2 max-w-xl text-sm text-muted">Listado interno. La cotización del cliente sigue siendo pública.</p>
         </div>
         <RouterLink to="/" class="btn btn-primary">Nueva cotización</RouterLink>
     </div>
