@@ -23,7 +23,7 @@ it('loads the graphql catalog, translates known names and stores them', function
     $response->assertOk()
         ->assertJsonPath('meta.source', 'api')
         ->assertJsonPath('meta.notice', null)
-        ->assertJsonFragment(['code' => 'ES', 'name' => 'España', 'surcharge_percent' => 20])
+        ->assertJsonFragment(['code' => 'ES', 'name' => 'España', 'name_es' => 'España', 'name_en' => 'Spain', 'surcharge_percent' => 20])
         ->assertJsonFragment(['code' => 'EC', 'name' => 'Ecuador', 'surcharge_percent' => 0]);
 
     expect(Country::query()->count())->toBe(2);
@@ -72,6 +72,25 @@ it('writes a json log when the countries api fails', function () {
         ->and($raw)->toContain('"reason":"unexpected"');
 
     @unlink($path);
+});
+
+it('exposes the spanish and english names for japan', function () {
+    Http::fake([
+        '*' => Http::response([
+            'data' => [
+                'countries' => [graphqlCountry('JP', 'Japan', 'Asia')],
+            ],
+        ]),
+    ]);
+
+    $this->getJson('/api/countries')
+        ->assertOk()
+        ->assertJsonPath('data.0.code', 'JP')
+        ->assertJsonPath('data.0.name', 'Japón')
+        ->assertJsonPath('data.0.name_es', 'Japón')
+        ->assertJsonPath('data.0.name_en', 'Japan');
+
+    expect(Country::query()->where('code', 'JP')->value('name_es'))->toBe('Japón');
 });
 
 it('prefers the database cache when the api is down and countries were synced before', function () {

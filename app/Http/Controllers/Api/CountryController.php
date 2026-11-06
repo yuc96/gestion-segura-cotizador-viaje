@@ -19,6 +19,8 @@ final class CountryController extends Controller
             'data' => array_map(fn (Country $country): array => [
                 'code' => $country->code,
                 'name' => $country->name,
+                'name_es' => $country->name,
+                'name_en' => $country->nameEn,
                 'region' => $country->region,
                 'subregion' => $country->subregion,
                 'pricing_region' => $country->pricingRegion->value,

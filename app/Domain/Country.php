@@ -13,16 +13,18 @@ final readonly class Country
         public ?string $subregion,
         public PricingRegion $pricingRegion,
         public string $flagEmoji,
+        public string $nameEn = '',
     ) {}
 
     /**
-     * @return array{code: string, name: string, region: string, subregion: ?string, pricing_region: string, flag_emoji: string}
+     * @return array{code: string, name: string, name_en: string, region: string, subregion: ?string, pricing_region: string, flag_emoji: string}
      */
     public function toCacheArray(): array
     {
         return [
             'code' => $this->code,
             'name' => $this->name,
+            'name_en' => $this->nameEn,
             'region' => $this->region,
             'subregion' => $this->subregion,
             'pricing_region' => $this->pricingRegion->value,
@@ -42,6 +44,7 @@ final readonly class Country
             subregion: $row['subregion'] ?? null,
             pricingRegion: PricingRegion::from($row['pricing_region']),
             flagEmoji: $row['flag_emoji'] ?? '',
+            nameEn: $row['name_en'] ?? '',
         );
     }
 }

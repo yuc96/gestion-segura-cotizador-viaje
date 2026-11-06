@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, onMounted, reactive } from 'vue';
 import { useRouter } from 'vue-router';
+import BirthDateField from '../components/BirthDateField.vue';
+import CountryCombobox from '../components/CountryCombobox.vue';
 import Field from '../components/Field.vue';
 import { firstError } from '../api';
 import { useCountryStore } from '../stores/countries';
@@ -13,7 +15,6 @@ const countries = useCountryStore();
 const pricing = usePricingStore();
 const quotes = useQuoteStore();
 
-const countryQuery = ref('');
 const localErrors = reactive<Record<string, string>>({});
 
 const form = reactive({
@@ -25,26 +26,6 @@ const form = reactive({
     destination_code: '',
     departure_date: '',
     return_date: '',
-});
-
-const visibleCountries = computed(() => {
-    const query = countryQuery.value.trim().toLocaleLowerCase('es');
-    const items = countries.items.filter((country) => {
-        if (!query) {
-            return true;
-        }
-
-        return country.name.toLocaleLowerCase('es').includes(query)
-            || country.code.toLowerCase().includes(query);
-    });
-
-    const selected = countries.items.find((country) => country.code === form.destination_code);
-
-    if (selected && !items.some((country) => country.code === selected.code)) {
-        return [selected, ...items];
-    }
-
-    return items;
 });
 
 const selectedCountry = computed(() => countries.items.find((country) => country.code === form.destination_code) ?? null);
@@ -82,7 +63,7 @@ async function submit() {
 
     try {
         const quote = await quotes.create({ ...form });
-        await router.push({ name: 'quote.show', params: { id: quote.id } });
+        await router.push({ name: 'quote.show', params: { id: String(quote.id) } });
     } catch {
         // El store conserva el mensaje y los errores de campo.
     }
@@ -118,9 +99,12 @@ onMounted(() => {
                     <Field label="Correo electrónico" :error="errorFor('email')">
                         <input v-model="form.email" class="field-input" type="email" autocomplete="email" :aria-invalid="Boolean(errorFor('email'))" @input="touch('email')">
                     </Field>
-                    <Field label="Fecha de nacimiento" hint="Debe tener entre 18 y 85 años al salir." :error="errorFor('birth_date')">
-                        <input v-model="form.birth_date" class="field-input" type="date" :aria-invalid="Boolean(errorFor('birth_date'))" @input="touch('birth_date')">
-                    </Field>
+                    <div class="sm:col-span-2">
+                        <span class="mb-1.5 block text-sm font-semibold text-navy-950">Fecha de nacimiento</span>
+                        <BirthDateField v-model="form.birth_date" :invalid="Boolean(errorFor('birth_date'))" @update:model-value="touch('birth_date')" />
+                        <p class="mt-1 text-xs text-muted">DD/MM/AAAA. Entre 18 y 85 años en la fecha de salida.</p>
+                        <p v-if="errorFor('birth_date')" class="mt-1 text-sm text-danger" role="alert">{{ errorFor('birth_date') }}</p>
+                    </div>
                 </div>
 
                 <h2 class="mt-8 font-serif text-2xl text-navy-900">Viaje</h2>
@@ -131,17 +115,18 @@ onMounted(() => {
                 </p>
 
                 <div class="mt-4 grid gap-4 sm:grid-cols-2">
-                    <Field label="Buscar país" hint="Filtra la lista. No cambia la prima.">
-                        <input v-model="countryQuery" class="field-input" placeholder="Ecuador, España, Japón…" :disabled="countries.loading">
-                    </Field>
-                    <Field label="País de destino" :error="errorFor('destination_code')">
-                        <select v-model="form.destination_code" class="field-input" :disabled="countries.loading || countries.items.length === 0" :aria-invalid="Boolean(errorFor('destination_code'))" @change="touch('destination_code')">
-                            <option value="">{{ countries.loading ? 'Cargando países…' : 'Selecciona un país' }}</option>
-                            <option v-for="country in visibleCountries" :key="country.code" :value="country.code">
-                                {{ country.flag_emoji }} {{ country.name }}
-                            </option>
-                        </select>
-                    </Field>
+                    <div class="sm:col-span-2">
+                        <span class="mb-1.5 block text-sm font-semibold text-navy-950">País de destino</span>
+                        <CountryCombobox
+                            v-model="form.destination_code"
+                            :countries="countries.items"
+                            :loading="countries.loading"
+                            :invalid="Boolean(errorFor('destination_code'))"
+                            @update:model-value="touch('destination_code')"
+                        />
+                        <p class="mt-1 text-xs text-muted">Escribe en español o inglés, con o sin tilde. También vale el código ISO.</p>
+                        <p v-if="errorFor('destination_code')" class="mt-1 text-sm text-danger" role="alert">{{ errorFor('destination_code') }}</p>
+                    </div>
                     <Field label="Fecha de salida" :error="errorFor('departure_date')">
                         <input v-model="form.departure_date" class="field-input" type="date" :aria-invalid="Boolean(errorFor('departure_date'))" @input="touch('departure_date')">
                     </Field>
@@ -153,7 +138,6 @@ onMounted(() => {
                 <p v-if="selectedCountry" class="mt-4 text-sm text-muted">
                     {{ selectedCountry.flag_emoji }} {{ selectedCountry.name }} · {{ selectedCountry.pricing_region_label }} · recargo {{ selectedCountry.surcharge_percent }}%.
                 </p>
-                <p v-if="visibleCountries.length === 0 && !countries.loading" class="mt-3 text-sm text-muted">Ningún país coincide con la búsqueda.</p>
                 <p v-if="quotes.error && Object.keys(quotes.fieldErrors).length === 0" class="mt-4 text-sm text-danger" role="alert">{{ quotes.error }}</p>
 
                 <div class="mt-6 flex flex-wrap items-center gap-3">

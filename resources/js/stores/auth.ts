@@ -13,7 +13,7 @@ export const useAuthStore = defineStore('auth', {
     actions: {
         async fetchUser() {
             try {
-                const payload = await api<{ data: AuthUser }>('/user');
+                const payload = await api<{ data: AuthUser | null }>('/user');
                 this.user = payload.data;
             } catch {
                 this.user = null;

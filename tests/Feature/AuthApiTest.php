@@ -5,7 +5,9 @@ use App\Models\User;
 
 it('rejects a guest from the quote list and still lets them quote', function () {
     $this->getJson('/api/quotes', ['Origin' => 'http://localhost'])->assertUnauthorized();
-    $this->getJson('/api/user', ['Origin' => 'http://localhost'])->assertUnauthorized();
+    $this->getJson('/api/user', ['Origin' => 'http://localhost'])
+        ->assertOk()
+        ->assertJsonPath('data', null);
 
     $this->postJson('/api/quotes', quotePayload())->assertCreated();
 });

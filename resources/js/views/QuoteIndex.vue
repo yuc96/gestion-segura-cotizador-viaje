@@ -108,7 +108,7 @@ onMounted(load);
                 <tbody>
                     <tr v-for="quote in quotes.items" :key="quote.id" class="border-t border-line">
                         <td class="px-4 py-3">
-                            <RouterLink class="font-semibold text-navy-900" :to="{ name: 'quote.show', params: { id: quote.id } }">
+                            <RouterLink class="font-semibold text-navy-900" :to="{ name: 'quote.show', params: { id: String(quote.id) } }">
                                 {{ quote.insured.full_name }}
                             </RouterLink>
                         </td>
@@ -129,7 +129,7 @@ onMounted(load);
                 v-for="quote in quotes.items"
                 :key="quote.id"
                 class="rounded-3xl border border-line bg-card p-4 text-inherit no-underline"
-                :to="{ name: 'quote.show', params: { id: quote.id } }"
+                :to="{ name: 'quote.show', params: { id: String(quote.id) } }"
             >
                 <div class="flex items-start justify-between gap-3">
                     <div>

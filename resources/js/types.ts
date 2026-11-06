@@ -6,6 +6,8 @@ export interface AuthUser {
 export interface Country {
     code: string;
     name: string;
+    name_es?: string;
+    name_en?: string;
     region: string;
     subregion: string | null;
     pricing_region: string;

@@ -24,8 +24,13 @@ final class SessionController extends Controller
 
     public function show(Request $request): JsonResponse
     {
+        $user = Auth::guard('web')->user();
+
         return response()->json([
-            'data' => $this->userPayload($request),
+            'data' => $user ? [
+                'name' => $user->name,
+                'email' => $user->email,
+            ] : null,
         ]);
     }
 

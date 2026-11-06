@@ -15,6 +15,8 @@ class CountrySeeder extends Seeder
         $rows = array_map(fn (CountryData $country): array => [
             'code' => $country->code,
             'name' => $country->name,
+            'name_es' => $country->name,
+            'name_en' => $country->nameEn !== '' ? $country->nameEn : null,
             'region' => $country->region,
             'subregion' => $country->subregion,
             'pricing_region' => $country->pricingRegion->value,
@@ -27,7 +29,7 @@ class CountrySeeder extends Seeder
             Country::query()->upsert(
                 $chunk,
                 ['code'],
-                ['name', 'region', 'subregion', 'pricing_region', 'flag_emoji', 'updated_at'],
+                ['name', 'name_es', 'name_en', 'region', 'subregion', 'pricing_region', 'flag_emoji', 'updated_at'],
             );
         }
     }

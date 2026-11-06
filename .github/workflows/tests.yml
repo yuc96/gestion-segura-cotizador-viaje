@@ -35,3 +35,6 @@ jobs:
 
       - name: Compilar Vue
         run: npm ci && npm run build
+
+      - name: Probar el formulario en el navegador de Node
+        run: node --experimental-strip-types --test tests/js/formHelpers.test.ts

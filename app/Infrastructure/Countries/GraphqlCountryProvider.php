@@ -9,13 +9,14 @@ use App\Application\Port\ActivityLog;
 use App\Application\Port\CountryProvider;
 use App\Domain\Country;
 use App\Domain\Exception\CountryProviderException;
+use App\Domain\SpanishCountryName;
 use App\Models\Country as CountryRecord;
 use Illuminate\Support\Facades\Cache;
 use Throwable;
 
 final class GraphqlCountryProvider implements CountryProvider
 {
-    private const CACHE_KEY = 'countries.catalog.v2';
+    private const CACHE_KEY = 'countries.catalog.v3';
 
     public function __construct(
         private CountriesGraphqlClient $client,
@@ -106,6 +107,8 @@ final class GraphqlCountryProvider implements CountryProvider
         $rows = array_map(fn (Country $country): array => [
             'code' => $country->code,
             'name' => $country->name,
+            'name_es' => $country->name,
+            'name_en' => $country->nameEn !== '' ? $country->nameEn : null,
             'region' => $country->region,
             'subregion' => $country->subregion,
             'pricing_region' => $country->pricingRegion->value,
@@ -118,7 +121,7 @@ final class GraphqlCountryProvider implements CountryProvider
             CountryRecord::query()->upsert(
                 $chunk,
                 ['code'],
-                ['name', 'region', 'subregion', 'pricing_region', 'flag_emoji', 'updated_at'],
+                ['name', 'name_es', 'name_en', 'region', 'subregion', 'pricing_region', 'flag_emoji', 'updated_at'],
             );
         }
     }
@@ -167,17 +170,17 @@ final class GraphqlCountryProvider implements CountryProvider
         }
 
         return array_map(function (Country $country) use ($names): Country {
-            if (! isset($names[$country->code]) || $names[$country->code] === $country->name) {
-                return $country;
-            }
+            $english = $country->nameEn !== '' ? $country->nameEn : $country->name;
+            $spanish = $names[$country->code] ?? SpanishCountryName::resolve($country->code, $english);
 
             return new Country(
                 code: $country->code,
-                name: $names[$country->code],
+                name: $spanish,
                 region: $country->region,
                 subregion: $country->subregion,
                 pricingRegion: $country->pricingRegion,
                 flagEmoji: $country->flagEmoji,
+                nameEn: $english,
             );
         }, $countries);
     }
@@ -204,11 +207,12 @@ final class GraphqlCountryProvider implements CountryProvider
     {
         return new Country(
             code: $country->code,
-            name: $country->name,
+            name: $country->name_es ?: $country->name,
             region: $country->region,
             subregion: $country->subregion,
             pricingRegion: $country->pricing_region,
             flagEmoji: (string) $country->flag_emoji,
+            nameEn: (string) ($country->name_en ?? ''),
         );
     }
 }
