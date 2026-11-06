@@ -28,8 +28,6 @@ const form = reactive({
     return_date: '',
 });
 
-const selectedCountry = computed(() => countries.items.find((country) => country.code === form.destination_code) ?? null);
-
 const catalogNotice = computed(() => {
     if (!countries.source || countries.source === 'api') {
         return '';
@@ -116,15 +114,16 @@ onMounted(() => {
 
                 <div class="mt-4 grid gap-4 sm:grid-cols-2">
                     <div class="sm:col-span-2">
-                        <span class="mb-1.5 block text-sm font-semibold text-navy-950">País de destino</span>
+                        <label id="destination-label" for="destination-country" class="mb-1.5 block text-sm font-semibold text-navy-950">País de destino</label>
                         <CountryCombobox
                             v-model="form.destination_code"
+                            input-id="destination-country"
+                            label-id="destination-label"
                             :countries="countries.items"
                             :loading="countries.loading"
                             :invalid="Boolean(errorFor('destination_code'))"
                             @update:model-value="touch('destination_code')"
                         />
-                        <p class="mt-1 text-xs text-muted">Escribe en español o inglés, con o sin tilde. También vale el código ISO.</p>
                         <p v-if="errorFor('destination_code')" class="mt-1 text-sm text-danger" role="alert">{{ errorFor('destination_code') }}</p>
                     </div>
                     <Field label="Fecha de salida" :error="errorFor('departure_date')">
@@ -135,9 +134,6 @@ onMounted(() => {
                     </Field>
                 </div>
 
-                <p v-if="selectedCountry" class="mt-4 text-sm text-muted">
-                    {{ selectedCountry.flag_emoji }} {{ selectedCountry.name }} · {{ selectedCountry.pricing_region_label }} · recargo {{ selectedCountry.surcharge_percent }}%.
-                </p>
                 <p v-if="quotes.error && Object.keys(quotes.fieldErrors).length === 0" class="mt-4 text-sm text-danger" role="alert">{{ quotes.error }}</p>
 
                 <div class="mt-6 flex flex-wrap items-center gap-3">

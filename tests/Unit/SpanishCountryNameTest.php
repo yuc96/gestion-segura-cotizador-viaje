@@ -16,3 +16,11 @@ it('matches japon, japón, japan and jp to the same country', function (string $
 it('does not match an unrelated query', function () {
     expect(CountrySearch::matches('Japón', 'Japan', 'JP', 'Ecuador'))->toBeFalse();
 });
+
+it('ranks a name that starts with the query ahead of a partial name', function () {
+    expect(CountrySearch::relevance('Jamaica', 'Jamaica', 'JM', 'ja'))->toBe(0)
+        ->and(CountrySearch::relevance('Japón', 'Japan', 'JP', 'ja'))->toBe(0)
+        ->and(CountrySearch::relevance('Japón', 'Japan', 'JP', 'pon'))->toBe(1)
+        ->and(CountrySearch::relevance('Panamá', 'Panama', 'PA', 'pa'))->toBe(0)
+        ->and(CountrySearch::relevance('Japón', 'Japan', 'JP', 'ecuador'))->toBeNull();
+});

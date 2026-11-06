@@ -117,7 +117,7 @@ El cliente hace un POST con timeout de 8 segundos y un reintento si se cae la co
 
 Cuando la lectura sirve, los países se guardan en la tabla `countries` y en caché 12 horas. Si falla, se usa esa tabla. Si está vacía, se usa `database/data/countries.json`. El fallo se cachea 10 minutos para volver a intentar la API pronto.
 
-El nombre que se muestra es el español (`name_es`): primero el mapa local y, si falta, `Locale::getDisplayRegion('und_XX', 'es')`. El nombre inglés queda en `name_en`. El buscador ignora mayúsculas y tildes, así que Japon, Japón, japan y JP encuentran Japón. La fecha de nacimiento se escribe DD/MM/AAAA; la salida y el regreso siguen en el calendario del navegador.
+El nombre que se muestra es el español (`name_es`): primero el mapa local y, si falta, `Locale::getDisplayRegion('und_XX', 'es')`. El nombre inglés queda en `name_en`. El formulario tiene un solo campo, País de destino: al pulsarlo se abre la lista completa y al escribir se filtra en ese mismo campo. Las coincidencias que empiezan por el texto van primero. La búsqueda ignora mayúsculas y tildes, así que Japon, Japón, japan y JP encuentran Japón. La fecha de nacimiento se escribe DD/MM/AAAA; la salida y el regreso siguen en el calendario del navegador.
 
 | Continente o subregión | Tarifa | Recargo |
 | --- | --- | --- |

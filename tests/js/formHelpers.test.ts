@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { countryMatches } from '../../resources/js/countrySearch.ts';
+import { countryMatches, filterCountries } from '../../resources/js/countrySearch.ts';
 import { displayFromIso, isoFromDisplay, maskDayMonthYear } from '../../resources/js/birthDate.ts';
 
 const japan = { code: 'JP', name: 'Japón', name_en: 'Japan' };
@@ -14,6 +14,33 @@ describe('country search', () => {
 
     it('rejects an unrelated name', () => {
         assert.equal(countryMatches(japan, 'Ecuador'), false);
+    });
+
+    it('lists prefix matches before partial names', () => {
+        const countries = [
+            { code: 'AB', name: 'Abjasia', name_en: 'Abkhazia' },
+            { code: 'JP', name: 'Japón', name_en: 'Japan' },
+            { code: 'JM', name: 'Jamaica', name_en: 'Jamaica' },
+            { code: 'PA', name: 'Panamá', name_en: 'Panama' },
+            { code: 'ES', name: 'España', name_en: 'Spain' },
+        ];
+
+        assert.deepEqual(
+            filterCountries(countries, 'ja').map((country) => country.code),
+            ['JP', 'JM', 'AB'],
+        );
+        assert.deepEqual(
+            filterCountries(countries, 'pon').map((country) => country.code),
+            ['JP'],
+        );
+        assert.deepEqual(
+            filterCountries(countries, 'pa').map((country) => country.code),
+            ['PA', 'JP', 'ES'],
+        );
+        assert.deepEqual(
+            filterCountries(countries, '').map((country) => country.code),
+            ['AB', 'JP', 'JM', 'PA', 'ES'],
+        );
     });
 });
 
