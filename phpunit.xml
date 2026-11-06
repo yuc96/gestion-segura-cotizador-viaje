@@ -32,6 +32,6 @@
         <env name="PULSE_ENABLED" value="false"/>
         <env name="TELESCOPE_ENABLED" value="false"/>
         <env name="NIGHTWATCH_ENABLED" value="false"/>
-        <env name="RESTCOUNTRIES_API_KEY" value=""/>
+        <env name="COUNTRIES_API_URL" value="https://countries.trevorblades.com/"/>
     </php>
 </phpunit>

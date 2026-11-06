@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\Domain\Pricing;
 
 /**
- * REST Countries agrupa América en una sola región.
- * La tarifa distingue Sudamérica de Norteamérica, así que la subregión manda.
+ * La tarifa distingue Sudamérica de Norteamérica.
+ * Si hay subregión, manda ella. Si no, se usa la región o el continente.
  */
 final class RegionResolver
 {
@@ -14,12 +14,13 @@ final class RegionResolver
     {
         $region = trim((string) $region);
         $subregion = trim((string) $subregion);
+        $place = $subregion !== '' ? $subregion : $region;
 
-        if ($subregion === 'South America') {
+        if ($place === 'South America') {
             return PricingRegion::SouthAmerica;
         }
 
-        if (in_array($subregion, ['North America', 'Northern America', 'Central America', 'Caribbean'], true)) {
+        if (in_array($place, ['North America', 'Northern America', 'Central America', 'Caribbean'], true)) {
             return PricingRegion::NorthAmerica;
         }
 

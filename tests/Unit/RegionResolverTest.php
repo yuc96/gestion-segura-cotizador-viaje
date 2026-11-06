@@ -16,6 +16,9 @@ it('maps REST Countries regions onto the tariff table', function (?string $regio
     'South Africa' => ['Africa', 'Southern Africa', PricingRegion::Africa],
     'Australia' => ['Oceania', 'Australia and New Zealand', PricingRegion::Oceania],
     'Americas without subregion' => ['Americas', '', PricingRegion::NorthAmerica],
+    'South America continent' => ['South America', '', PricingRegion::SouthAmerica],
+    'North America continent' => ['North America', '', PricingRegion::NorthAmerica],
     'Antarctica' => ['Antarctic', '', PricingRegion::Other],
+    'Antarctica continent' => ['Antarctica', null, PricingRegion::Other],
     'unknown' => ['', null, PricingRegion::Other],
 ]);

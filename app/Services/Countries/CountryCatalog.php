@@ -8,17 +8,18 @@ use App\Domain\Countries\CatalogResult;
 use App\Domain\Countries\CountryData;
 use App\Domain\Countries\CountryProviderException;
 use App\Models\Country;
+use App\Support\StructuredLogger;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 final class CountryCatalog
 {
-    private const CACHE_KEY = 'countries.catalog.v1';
+    private const CACHE_KEY = 'countries.catalog.v2';
 
     public function __construct(
-        private RestCountriesClient $client,
+        private CountriesGraphqlClient $client,
         private BundledCountryCatalog $bundled,
+        private StructuredLogger $logger,
     ) {}
 
     public function get(): CatalogResult
@@ -33,32 +34,28 @@ final class CountryCatalog
             );
         }
 
-        if ((string) config('services.restcountries.key') !== '') {
-            try {
-                $countries = $this->sort($this->client->fetchAll());
-                $this->persist($countries);
-                $result = new CatalogResult($countries, 'api', null);
-                $this->remember($result, (int) config('services.restcountries.cache_ttl_minutes', 720));
+        try {
+            $countries = $this->sort($this->localize($this->client->fetchAll()));
+            $this->persist($countries);
+            $result = new CatalogResult($countries, 'api', null);
+            $this->remember($result, (int) config('services.countries.cache_ttl_minutes', 720));
 
-                return $result;
-            } catch (CountryProviderException $exception) {
-                Log::warning('countries.catalog.fallback', [
-                    'reason' => $exception->reason,
-                    'message' => $exception->getMessage(),
-                ]);
+            return $result;
+        } catch (CountryProviderException $exception) {
+            $this->logger->warning('countries.catalog.fallback', [
+                'reason' => $exception->reason,
+                'message' => $exception->getMessage(),
+            ]);
 
-                return $this->fallback($exception->getMessage());
-            } catch (Throwable $exception) {
-                Log::warning('countries.catalog.fallback', [
-                    'reason' => 'unexpected',
-                    'message' => $exception->getMessage(),
-                ]);
+            return $this->fallback($exception->getMessage());
+        } catch (Throwable $exception) {
+            $this->logger->warning('countries.catalog.fallback', [
+                'reason' => 'unexpected',
+                'message' => $exception->getMessage(),
+            ]);
 
-                return $this->fallback('Error inesperado al consultar la API de países.');
-            }
+            return $this->fallback('Error inesperado al consultar la API de países.');
         }
-
-        return $this->fallback('No hay una API key de REST Countries configurada.');
     }
 
     public function find(string $code): ?CountryData
@@ -84,7 +81,7 @@ final class CountryCatalog
                 source: 'cache',
                 notice: $notice,
             );
-            $this->remember($result, (int) config('services.restcountries.failure_ttl_minutes', 10));
+            $this->remember($result, (int) config('services.countries.failure_ttl_minutes', 10));
 
             return $result;
         }
@@ -94,7 +91,7 @@ final class CountryCatalog
             source: 'snapshot',
             notice: $notice,
         );
-        $this->remember($result, (int) config('services.restcountries.failure_ttl_minutes', 10));
+        $this->remember($result, (int) config('services.countries.failure_ttl_minutes', 10));
 
         return $result;
     }
@@ -154,6 +151,38 @@ final class CountryCatalog
         }
 
         return $countries;
+    }
+
+    /**
+     * @param  list<CountryData>  $countries
+     * @return list<CountryData>
+     */
+    /**
+     * @param  list<CountryData>  $countries
+     * @return list<CountryData>
+     */
+    private function localize(array $countries): array
+    {
+        $names = [];
+
+        foreach ($this->bundled->all() as $country) {
+            $names[$country->code] = $country->name;
+        }
+
+        return array_map(function (CountryData $country) use ($names): CountryData {
+            if (! isset($names[$country->code]) || $names[$country->code] === $country->name) {
+                return $country;
+            }
+
+            return new CountryData(
+                code: $country->code,
+                name: $names[$country->code],
+                region: $country->region,
+                subregion: $country->subregion,
+                pricingRegion: $country->pricingRegion,
+                flagEmoji: $country->flagEmoji,
+            );
+        }, $countries);
     }
 
     /**

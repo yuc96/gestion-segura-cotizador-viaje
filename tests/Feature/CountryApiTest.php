@@ -3,69 +3,43 @@
 use App\Models\Country;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
-it('serves the bundled snapshot without calling the api when no key is configured', function () {
-    config(['services.restcountries.key' => '']);
+it('loads the graphql catalog, translates known names and stores them', function () {
+    Http::fake([
+        '*' => Http::response([
+            'data' => [
+                'countries' => [
+                    graphqlCountry('ES', 'Spain', 'Europe'),
+                    graphqlCountry('EC', 'Ecuador', 'South America'),
+                    ['name' => 'sin código'],
+                ],
+            ],
+        ]),
+    ]);
 
     $response = $this->getJson('/api/countries');
 
     $response->assertOk()
-        ->assertJsonPath('meta.source', 'snapshot')
-        ->assertJsonFragment(['code' => 'EC', 'name' => 'Ecuador', 'surcharge_percent' => 0])
-        ->assertJsonFragment(['code' => 'ES', 'name' => 'España', 'surcharge_percent' => 20]);
-
-    expect($response->json('data'))->toHaveCount(250);
-
-    Http::assertNothingSent();
-});
-
-it('stores a usable v5 catalog and follows pagination', function () {
-    config(['services.restcountries.key' => 'test-key']);
-
-    Http::fake([
-        '*' => Http::sequence()
-            ->push([
-                'data' => [
-                    'objects' => [countryRow('ES', 'España', 'Europe', 'Southern Europe')],
-                    'meta' => ['more' => true, 'count' => 1],
-                ],
-            ])
-            ->push([
-                'data' => [
-                    'objects' => [countryRow('EC', 'Ecuador', 'Americas', 'South America')],
-                    'meta' => ['more' => false, 'count' => 1],
-                ],
-            ]),
-    ]);
-
-    $this->getJson('/api/countries')
-        ->assertOk()
         ->assertJsonPath('meta.source', 'api')
         ->assertJsonPath('meta.notice', null)
-        ->assertJsonFragment(['code' => 'ES', 'surcharge_percent' => 20])
-        ->assertJsonFragment(['code' => 'EC', 'surcharge_percent' => 0]);
+        ->assertJsonFragment(['code' => 'ES', 'name' => 'España', 'surcharge_percent' => 20])
+        ->assertJsonFragment(['code' => 'EC', 'name' => 'Ecuador', 'surcharge_percent' => 0]);
 
     expect(Country::query()->count())->toBe(2);
-    Http::assertSentCount(2);
+    Http::assertSent(function ($request) {
+        return $request->method() === 'POST'
+            && str_contains((string) $request['query'], 'countries');
+    });
 });
 
-it('falls back to the snapshot when the api times out, fails or returns an unexpected body', function (string $scenario) {
-    config(['services.restcountries.key' => 'test-key']);
-
+it('falls back when the countries api times out, fails or returns an unexpected body', function (string $scenario) {
     Http::fake(match ($scenario) {
         'timeout' => fn () => throw new ConnectionException('timed out'),
         'http error' => ['*' => Http::response(['message' => 'unavailable'], 503)],
-        'deprecated body' => ['*' => Http::response([
-            'success' => false,
+        'graphql error' => ['*' => Http::response([
+            'errors' => [['message' => 'Cannot query field']],
             'data' => null,
-            'errors' => [['message' => 'deprecated']],
-        ])],
-        'demo payload' => ['*' => Http::response([
-            'data' => [
-                '_demo' => ['message' => 'demo'],
-                'objects' => [countryRow('CA', 'Canadá', 'Americas', 'North America')],
-                'meta' => ['more' => false, 'count' => 1],
-            ],
         ])],
         'not json' => ['*' => Http::response('upstream exploded', 200, ['Content-Type' => 'text/plain'])],
     });
@@ -78,18 +52,34 @@ it('falls back to the snapshot when the api times out, fails or returns an unexp
 })->with([
     'timeout',
     'http error',
-    'deprecated body',
-    'demo payload',
+    'graphql error',
     'not json',
 ]);
 
+it('writes a json log when the countries api fails', function () {
+    $path = storage_path('logs/structured-country-test.log');
+    @unlink($path);
+    config(['logging.channels.json.handler_with.stream' => $path]);
+    Log::forgetChannel('json');
+
+    Http::fake(['*' => Http::response(['errors' => [['message' => 'nope']]], 200)]);
+
+    $this->getJson('/api/countries')->assertOk()->assertJsonPath('meta.source', 'snapshot');
+
+    $raw = (string) file_get_contents($path);
+    expect($raw)->toContain('"countries.api.failure"')
+        ->and($raw)->toContain('"countries.catalog.fallback"')
+        ->and($raw)->toContain('"reason":"unexpected"');
+
+    @unlink($path);
+});
+
 it('prefers the database cache when the api is down and countries were synced before', function () {
-    config(['services.restcountries.key' => 'test-key']);
     Country::factory()->create([
         'code' => 'EC',
         'name' => 'Ecuador',
-        'region' => 'Americas',
-        'subregion' => 'South America',
+        'region' => 'South America',
+        'subregion' => null,
         'pricing_region' => 'South America',
         'flag_emoji' => '🇪🇨',
     ]);
@@ -105,16 +95,12 @@ it('prefers the database cache when the api is down and countries were synced be
 /**
  * @return array<string, mixed>
  */
-function countryRow(string $code, string $name, string $region, string $subregion): array
+function graphqlCountry(string $code, string $name, string $continent): array
 {
     return [
-        'names' => [
-            'common' => $name,
-            'translations' => ['spa' => ['common' => $name]],
-        ],
-        'codes' => ['alpha_2' => $code],
-        'region' => $region,
-        'subregion' => $subregion,
-        'flag' => ['emoji' => '🏳️'],
+        'code' => $code,
+        'name' => $name,
+        'emoji' => '🏳️',
+        'continent' => ['name' => $continent],
     ];
 }

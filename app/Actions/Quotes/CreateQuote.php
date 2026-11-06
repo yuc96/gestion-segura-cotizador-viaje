@@ -11,6 +11,7 @@ use App\Exceptions\UnknownDestination;
 use App\Models\Insured;
 use App\Models\Quote;
 use App\Services\Countries\CountryCatalog;
+use App\Support\StructuredLogger;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +21,7 @@ final class CreateQuote
         private CountryCatalog $countries,
         private TripDuration $duration,
         private TravelInsurancePricer $pricer,
+        private StructuredLogger $logger,
     ) {}
 
     public function handle(CreateQuoteData $data): Quote
@@ -35,7 +37,7 @@ final class CreateQuote
         $days = $this->duration->inclusiveDays($departure, $return);
         $price = $this->pricer->price($days, $country->pricingRegion);
 
-        return DB::transaction(function () use ($data, $country, $departure, $return, $price): Quote {
+        $quote = DB::transaction(function () use ($data, $country, $departure, $return, $price): Quote {
             $insured = Insured::query()->create([
                 'first_name' => $data->firstName,
                 'last_name' => $data->lastName,
@@ -64,5 +66,15 @@ final class CreateQuote
                 'status' => QuoteStatus::Quoted,
             ])->load('insured');
         });
+
+        $this->logger->info('quote.created', [
+            'quote_id' => $quote->id,
+            'destination_code' => $quote->destination_code,
+            'trip_days' => $quote->trip_days,
+            'total_cents' => $quote->total_amount_cents,
+            'status' => $quote->status->value,
+        ]);
+
+        return $quote;
     }
 }

@@ -13,7 +13,8 @@ final class CountryResponseNormalizer
     public function __construct(private RegionResolver $regions) {}
 
     /**
-     * Acepta el sobre de REST Countries v5 y el arreglo legado de v3.
+     * Acepta el catálogo GraphQL (countries.trevorblades.com) y, si apareciera,
+     * el sobre de REST Countries v5 o el arreglo legado de v3.
      *
      * @param  array<mixed>  $payload
      * @return list<CountryData>
@@ -59,6 +60,14 @@ final class CountryResponseNormalizer
      */
     private function rows(array $payload): array
     {
+        if (isset($payload['errors']) && is_array($payload['errors']) && $payload['errors'] !== [] && ! isset($payload['data']['countries'])) {
+            throw new CountryProviderException('La API de países indicó un error.', 'unexpected');
+        }
+
+        if (isset($payload['data']['countries']) && is_array($payload['data']['countries'])) {
+            return array_values($payload['data']['countries']);
+        }
+
         if (isset($payload['data']['objects']) && is_array($payload['data']['objects'])) {
             return array_values($payload['data']['objects']);
         }
@@ -75,7 +84,7 @@ final class CountryResponseNormalizer
      */
     private function mapRow(array $row): ?CountryData
     {
-        $code = strtoupper((string) ($row['codes']['alpha_2'] ?? $row['cca2'] ?? ''));
+        $code = strtoupper((string) ($row['code'] ?? $row['codes']['alpha_2'] ?? $row['cca2'] ?? ''));
 
         if (preg_match('/^[A-Z]{2}$/', $code) !== 1) {
             return null;
@@ -87,7 +96,7 @@ final class CountryResponseNormalizer
             return null;
         }
 
-        $region = trim((string) ($row['region'] ?? ''));
+        $region = trim((string) ($row['continent']['name'] ?? $row['region'] ?? ''));
         $subregion = trim((string) ($row['subregion'] ?? ''));
 
         return new CountryData(
@@ -106,6 +115,7 @@ final class CountryResponseNormalizer
     private function name(array $row): ?string
     {
         $candidates = [
+            is_string($row['name'] ?? null) ? $row['name'] : null,
             $row['names']['translations']['spa']['common'] ?? null,
             $row['translations']['spa']['common'] ?? null,
             $row['name']['translations']['spa']['common'] ?? null,
@@ -127,7 +137,7 @@ final class CountryResponseNormalizer
      */
     private function flag(array $row): string
     {
-        $flag = $row['flag'] ?? '';
+        $flag = $row['emoji'] ?? $row['flag'] ?? '';
 
         if (is_string($flag)) {
             return $flag;
