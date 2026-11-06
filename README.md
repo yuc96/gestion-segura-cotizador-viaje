@@ -74,7 +74,7 @@ Pest ejecuta las pruebas sobre SQLite en memoria. El esquema no usa tipos exclus
 2. La pantalla siguiente muestra días, tarifa base, porcentaje, recargo y total.
 3. **Descargar PDF** genera el documento de esa cotización.
 4. **Contratar seguro** guarda la fecha de contratación y cambia el estado. No se puede contratar dos veces.
-5. **Contrataciones** pide iniciar sesión. Lista cliente, identificación, destino, fechas, valor, estado y fecha de creación. Se puede buscar, filtrar por estado y por rango de salida, y paginar.
+5. **Listado interno.** Ingresar abre la sesión del equipo y muestra las cotizaciones: cliente, identificación, destino, fechas, valor, estado y fecha de creación. Se puede buscar, filtrar por estado y por rango de salida, y paginar. Con la sesión abierta, Listado vuelve a esa pantalla.
 
 ## Arquitectura
 

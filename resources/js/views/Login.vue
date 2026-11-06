@@ -21,7 +21,9 @@ function errorFor(key: 'email' | 'password'): string {
 async function submit() {
     try {
         await auth.login(form.email, form.password);
-        const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/contrataciones';
+        const redirect = typeof route.query.redirect === 'string' && route.query.redirect.startsWith('/') && !route.query.redirect.startsWith('//')
+            ? route.query.redirect
+            : '/listado';
         await router.push(redirect);
     } catch {
         // El store muestra el error.

@@ -14,7 +14,7 @@ const router = createRouter({
         { path: '/', name: 'quote.create', component: QuoteCreate },
         { path: '/cotizaciones/:id', name: 'quote.show', component: QuoteShow, props: true },
         { path: '/ingresar', name: 'login', component: Login },
-        { path: '/contrataciones', name: 'quotes.index', component: QuoteIndex, meta: { requiresAuth: true } },
+        { path: '/listado', name: 'quotes.index', component: QuoteIndex, meta: { requiresAuth: true } },
         { path: '/:pathMatch(.*)*', redirect: '/' },
     ],
 });

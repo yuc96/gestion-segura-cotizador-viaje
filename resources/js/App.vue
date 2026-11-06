@@ -33,7 +33,7 @@ async function logout() {
                 </RouterLink>
                 <nav class="flex flex-wrap items-center gap-2 text-sm font-semibold">
                     <RouterLink to="/" class="rounded-full px-3 py-2 text-white/80 no-underline" exact-active-class="bg-white/10 text-white">Cotizar</RouterLink>
-                    <RouterLink to="/contrataciones" class="rounded-full px-3 py-2 text-white/80 no-underline" active-class="bg-white/10 text-white">Contrataciones</RouterLink>
+                    <RouterLink v-if="auth.user" to="/listado" class="rounded-full px-3 py-2 text-white/80 no-underline" active-class="bg-white/10 text-white">Listado</RouterLink>
                     <button v-if="auth.user" class="rounded-full px-3 py-2 text-white/80" type="button" @click="logout">Salir</button>
                     <RouterLink v-else to="/ingresar" class="rounded-full px-3 py-2 text-white/80 no-underline" active-class="bg-white/10 text-white">Ingresar</RouterLink>
                 </nav>
